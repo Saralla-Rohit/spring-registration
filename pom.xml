@@ -12,6 +12,7 @@
 	<groupId>com.example</groupId>
 	<artifactId>SpringBootMVCFirstApp-3</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>war</packaging>
 	<name>SpringBootMVCFirstApp-3</name>
 	<description>SpringBootFirstApplicationWithDependencyFunctionalities</description>
 	<url />
