@@ -1,64 +1,67 @@
 # Spring Registration Application
 
-A containerized Spring Boot MVC registration application using JSP, Spring Data JPA, MySQL, Docker, and Cloudflare Tunnel.
-
----
+A Spring Boot MVC registration application using JSP, Spring Data JPA, Hibernate, and MySQL. The application is containerized with Docker and publicly accessible through Cloudflare Tunnel.
 
 ## 🌐 Live Application
 
-**Live URL:** [spring-registration.rohitnet.dpdns.org](https://spring-registration.rohitnet.dpdns.org/?utm_source=chatgpt.com)
+**Public URL:**
+
+https://spring-registration.rohitnet.dpdns.org/
 
 ### Application Pages
 
-* **Registration:** [Register Page](https://spring-registration.rohitnet.dpdns.org/register?utm_source=chatgpt.com)
-* **Fetch Data:** [Fetch Data](https://spring-registration.rohitnet.dpdns.org/fetch?utm_source=chatgpt.com)
-
-The application is publicly accessible through Cloudflare Tunnel.
+* Registration: https://spring-registration.rohitnet.dpdns.org/register
+* Fetch registered data: https://spring-registration.rohitnet.dpdns.org/fetch
 
 ---
 
-## Architecture
+# 🏗️ Architecture
 
 ```text
-                         Internet
+                         INTERNET
                             │
                             ▼
                     ┌─────────────────┐
                     │    Cloudflare   │
-                    │      Tunnel     │
+                    │     Tunnel      │
                     └────────┬────────┘
                              │
                              ▼
-                    spring-registration
-                    .rohitnet.dpdns.org
+                  spring-registration
+                  .rohitnet.dpdns.org
                              │
                              ▼
-                    localhost:8081
+                    cloudflared daemon
+                             │
+                             ▼
+                     localhost:8081
                              │
                              ▼
               ┌──────────────────────────┐
-              │   spring-registration    │
-              │      Spring Boot         │
-              │       Tomcat :8081       │
+              │ Spring Registration      │
+              │ Docker Container         │
+              │ Port 8081                │
               └────────────┬─────────────┘
                            │
-                    Docker network
-                       spring-net
-                           │
+                           │ spring-net
                            ▼
               ┌──────────────────────────┐
-              │          mysql           │
-              │       MySQL 9.7          │
-              │        :3306             │
+              │ MySQL 9.7 Docker         │
+              │ Container                │
+              │ mysql:3306               │
               └────────────┬─────────────┘
                            │
                            ▼
-                    mysql-data volume
+                    Database: rohit
+                           │
+                    ┌──────┴─────────┐
+                    │                │
+             registration    registration_seq
 ```
 
 ---
 
-## Technologies
+# 🛠️ Technologies
 
 * Java 17
 * Spring Boot 4.1.1
@@ -66,6 +69,7 @@ The application is publicly accessible through Cloudflare Tunnel.
 * Spring Data JPA
 * Hibernate
 * JSP
+* JSTL
 * Apache Tomcat 11
 * MySQL 9.7
 * Maven
@@ -73,91 +77,54 @@ The application is publicly accessible through Cloudflare Tunnel.
 * Docker Network
 * Docker Volume
 * Cloudflare Tunnel
-* Ubuntu Server
+* Ubuntu Server 24.04.x
 
 ---
 
-## Application Features
-
-The application provides:
-
-* Registration page
-* Registration form submission
-* Data persistence using MySQL
-* Fetching registered data
-* JSP-based views
-* Exception handling
-* Spring Data JPA repository integration
-* Public HTTPS access through Cloudflare Tunnel
-
-### Application URLs
-
-```text
-/register
-```
-
-Displays the registration page.
-
-```text
-/printDetail
-```
-
-Accepts registration form data using HTTP POST.
-
-```text
-/fetch
-```
-
-Fetches registration data from MySQL.
-
----
-
-# Project Structure
+# 📁 Project Structure
 
 ```text
 spring-registration/
 │
-├── Dockerfile
-├── pom.xml
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/
+│   │   │       ├── SpringBootMvcFirstApp3Application.java
+│   │   │       │
+│   │   │       ├── controller/
+│   │   │       │   └── RegistrationController.java
+│   │   │       │
+│   │   │       ├── entity/
+│   │   │       │   └── RegistrationDetail.java
+│   │   │       │
+│   │   │       └── service/
+│   │   │           └── RegistrationService.java
+│   │   │
+│   │   └── webapp/
+│   │       └── WEB-INF/
+│   │           └── view/
+│   │               ├── registration.jsp
+│   │               ├── status.jsp
+│   │               ├── print.jsp
+│   │               └── errorPage.jsp
+│   │
+│   └── test/
 │
-└── src/
-    └── main/
-        ├── java/
-        │   └── com/
-        │       ├── SpringBootMvcFirstApp3Application.java
-        │       │
-        │       ├── controller/
-        │       │   └── RegistrationController.java
-        │       │
-        │       ├── entity/
-        │       │   └── RegistrationDetail.java
-        │       │
-        │       ├── repository/
-        │       │   └── RegistrationRepository.java
-        │       │
-        │       └── service/
-        │           └── RegistrationService.java
-        │
-        ├── resources/
-        │   └── application.properties
-        │
-        └── webapp/
-            └── WEB-INF/
-                └── view/
-                    ├── registration.jsp
-                    ├── status.jsp
-                    ├── print.jsp
-                    └── errorPage.jsp
+├── pom.xml
+├── Dockerfile
+└── README.md
 ```
 
 ---
 
-# Spring Configuration
+# ⚙️ Spring Boot Configuration
 
-`src/main/resources/application.properties`
+`application.properties`:
 
 ```properties
 spring.application.name=SpringBootMVCFirstApp-3
+
 server.port=8081
 
 spring.mvc.view.prefix=/WEB-INF/view/
@@ -173,177 +140,222 @@ spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
 ```
 
-### Environment Variables
+The database credentials are supplied through Docker environment variables rather than being hard-coded in the application.
 
-The application receives database configuration through environment variables:
+---
+
+# 🗄️ Database Configuration
+
+Spring connects to MySQL using:
 
 ```text
-DB_URL
-DB_USERNAME
-DB_PASSWORD
+jdbc:mysql://mysql:3306/rohit
 ```
 
-Example:
+Important:
+
+`mysql` is the Docker container name and is resolvable through the Docker network.
+
+Inside Docker:
 
 ```text
-DB_URL=jdbc:mysql://mysql:3306/rohit
-DB_USERNAME=root
-DB_PASSWORD=<your-password>
-```
-
-The application does not use `localhost` for MySQL.
-
-Inside Docker, the MySQL container is reachable using:
-
-```text
+Spring Container
+      │
+      ▼
 mysql:3306
-```
-
-because both containers are connected to the `spring-net` Docker network.
-
----
-
-# Controller
-
-The main controller provides:
-
-```text
-/register
-/printDetail
-/fetch
-```
-
-The registration process is:
-
-```text
-Browser
-   ↓
-/register
-   ↓
-registration.jsp
-   ↓
-POST /printDetail
-   ↓
-RegistrationController
-   ↓
-RegistrationService
-   ↓
-RegistrationRepository
-   ↓
-MySQL
-   ↓
-status.jsp
+      │
+      ▼
+MySQL Container
 ```
 
 ---
 
-# Database
+# 🐳 Docker Network
 
-The application uses:
-
-```text
-Database: rohit
-User: root
-Host: mysql
-Port: 3306
-```
-
-The MySQL container is intentionally **not exposed to the host or Internet**.
-
-The database is accessible only through the Docker network.
-
-```text
-spring-registration
-        │
-        │ spring-net
-        ▼
-      mysql:3306
-```
-
----
-
-# Docker
-
-## Docker Network
-
-Create the application network:
+The application and MySQL containers use a dedicated Docker network:
 
 ```bash
 docker network create spring-net
 ```
 
-Check:
+Check it with:
 
 ```bash
 docker network inspect spring-net
 ```
 
+The network allows the Spring container to communicate with MySQL using:
+
+```text
+mysql:3306
+```
+
 ---
 
-## MySQL Volume
+# 💾 MySQL Persistent Storage
 
-Create persistent database storage:
+A Docker volume is used to persist the database:
 
 ```bash
 docker volume create mysql-data
 ```
 
-Check:
-
-```bash
-docker volume inspect mysql-data
-```
-
 The volume is mounted at:
 
 ```text
-/var/lib/mysql
+mysql-data:/var/lib/mysql
 ```
 
-inside the MySQL container.
+This means removing/recreating the MySQL container does **not** remove the database data as long as the `mysql-data` volume is retained.
 
 ---
 
-# MySQL Container
+# 🐬 MySQL Docker Container
 
-Create the MySQL container:
+Current MySQL container:
+
+```text
+Container: mysql
+Image: mysql:9.7
+Internal Port: 3306
+Host Port: 3307
+Database: rohit
+Network: spring-net
+Volume: mysql-data
+Restart Policy: unless-stopped
+```
+
+Create it with:
 
 ```bash
 docker run -d \
   --name mysql \
   --restart unless-stopped \
   --network spring-net \
+  -p 3307:3306 \
   -e MYSQL_ROOT_PASSWORD='YOUR_MYSQL_PASSWORD' \
   -e MYSQL_DATABASE=rohit \
   -v mysql-data:/var/lib/mysql \
   mysql:9.7
 ```
 
-Important:
+### Why host port 3307?
 
-There is intentionally **no**:
+The Ubuntu server already has another MySQL installation using port `3306`.
+
+Therefore:
 
 ```text
--p 3306:3306
+Host MySQL 8.0
+localhost:3306
+        │
+        └── Existing host MySQL
+
+
+Docker MySQL 9.7
+localhost:3307
+        │
+        └── Docker container port 3306
 ```
 
-This keeps MySQL private.
+The Spring application does **not** use port 3307.
 
-Check:
+It continues to use:
 
-```bash
-docker ps
+```text
+mysql:3306
 ```
 
-Check MySQL logs:
+because communication between the Docker containers happens through `spring-net`.
+
+---
+
+# 🖥️ Two MySQL Instances
+
+This server currently has two separate MySQL installations.
+
+## Host MySQL
+
+Version:
+
+```text
+MySQL 8.0
+```
+
+Access:
 
 ```bash
-docker logs mysql
+sudo mysql -u root -p
+```
+
+Host MySQL:
+
+```text
+localhost:3306
+```
+
+Its `rohit` database currently contains:
+
+```text
+customers
+employees
+orders
 ```
 
 ---
 
-# Dockerfile
+## Docker MySQL
+
+Version:
+
+```text
+MySQL 9.7
+```
+
+Access from the host:
+
+```bash
+mysql -h 127.0.0.1 -P 3307 -u root -p
+```
+
+Its `rohit` database contains:
+
+```text
+registration
+registration_seq
+```
+
+This is the database used by the Spring application.
+
+---
+
+# 🔌 Spring → MySQL Connection
+
+The Spring container has:
+
+```text
+DB_URL=jdbc:mysql://mysql:3306/rohit
+DB_USERNAME=root
+DB_PASSWORD=********
+```
+
+Check the configuration:
+
+```bash
+docker exec spring-registration env | grep '^DB_'
+```
+
+Expected:
+
+```text
+DB_URL=jdbc:mysql://mysql:3306/rohit
+DB_USERNAME=root
+DB_PASSWORD=********
+```
+
+---
+
+# 🚀 Spring Dockerfile
 
 ```dockerfile
 FROM maven:3.9-eclipse-temurin-17 AS build
@@ -366,27 +378,11 @@ EXPOSE 8081
 ENTRYPOINT ["java", "-jar", "app.war"]
 ```
 
-The Dockerfile uses a multi-stage build.
-
-### Build Stage
-
-```text
-maven:3.9-eclipse-temurin-17
-```
-
-compiles the application and creates the WAR.
-
-### Runtime Stage
-
-```text
-eclipse-temurin:17-jre
-```
-
-runs only the packaged application.
+The application is packaged as a WAR and executed using the Java runtime.
 
 ---
 
-# Build Docker Image
+# 🏗️ Build the Application Image
 
 From the project directory:
 
@@ -394,21 +390,15 @@ From the project directory:
 docker build -t spring-registration:1.0 .
 ```
 
-Check:
+Check the image:
 
 ```bash
 docker images
 ```
 
-Expected image:
-
-```text
-spring-registration:1.0
-```
-
 ---
 
-# Run Spring Application
+# ▶️ Run Spring Application
 
 ```bash
 docker run -d \
@@ -424,44 +414,41 @@ docker run -d \
 
 ---
 
-# Verify Containers
+# 🔎 Check Running Containers
 
 ```bash
 docker ps
 ```
 
+Expected architecture:
+
+```text
+mysql
+spring-registration
+calci
+tailscale
+```
+
+Check restart policies:
+
+```bash
+docker inspect -f '{{.Name}} -> restart={{.HostConfig.RestartPolicy.Name}} status={{.State.Status}}' \
+mysql spring-registration calci
+```
+
 Expected:
 
 ```text
-mysql                 Up
-spring-registration   Up
-```
-
-The application should expose:
-
-```text
-0.0.0.0:8081 -> 8081
+/mysql -> restart=unless-stopped status=running
+/spring-registration -> restart=unless-stopped status=running
+/calci -> restart=unless-stopped status=running
 ```
 
 ---
 
-# Test Locally
+# 📜 Spring Logs
 
-Test the registration page:
-
-```bash
-curl -I http://localhost:8081/register
-```
-
-Or open:
-
-```text
-http://SERVER-IP:8081/register
-```
-
----
-
-# Check Spring Logs
+View application logs:
 
 ```bash
 docker logs spring-registration
@@ -476,235 +463,214 @@ docker logs -f spring-registration
 A successful startup contains:
 
 ```text
-Tomcat started on port 8081
-Started SpringBootMvcFirstApp3Application
-```
-
-Successful database connectivity contains:
-
-```text
-HikariPool-1 - Added connection
-```
-
-and:
-
-```text
+Tomcat initialized with port 8081
+HikariPool - Added connection
 Database JDBC URL [jdbc:mysql://mysql:3306/rohit]
+Tomcat started on port 8081
+Started SpringBootMVCFirstApp3Application
 ```
 
 ---
 
-# Check Environment Variables
+# 🗄️ Verify Database
+
+Connect directly to the Docker MySQL container:
 
 ```bash
-docker exec spring-registration env | grep '^DB_'
+docker exec -it mysql mysql -uroot -p
+```
+
+Then:
+
+```sql
+USE rohit;
+SHOW TABLES;
 ```
 
 Expected:
 
 ```text
-DB_URL=jdbc:mysql://mysql:3306/rohit
-DB_USERNAME=root
-DB_PASSWORD=...
++------------------+
+| Tables_in_rohit  |
++------------------+
+| registration     |
+| registration_seq |
++------------------+
 ```
-
-Do not commit the actual database password to Git.
 
 ---
 
-# Check Restart Policies
+# 📊 Check Registration Data
+
+From the host:
 
 ```bash
-docker inspect -f \
-'{{.Name}} -> restart={{.HostConfig.RestartPolicy.Name}} status={{.State.Status}}' \
-mysql spring-registration
+docker exec mysql mysql -uroot -p'YOUR_MYSQL_PASSWORD' rohit \
+-e "SELECT * FROM registration;"
+```
+
+Current test data contains two registration records.
+
+---
+
+# 🖥️ MySQL GUI Access
+
+Because Docker MySQL is mapped to host port `3307`, GUI applications such as DBeaver can connect directly.
+
+Use:
+
+```text
+Host:     127.0.0.1
+Port:     3307
+Database: rohit
+Username: root
+Password: YOUR_MYSQL_PASSWORD
+```
+
+Do **not** use port `3306` for the Docker database.
+
+Port `3306` belongs to the host MySQL installation.
+
+---
+
+# 🌐 Local Application Testing
+
+Test from the Ubuntu server:
+
+```bash
+curl -I http://localhost:8081/register
 ```
 
 Expected:
 
 ```text
-/mysql -> restart=unless-stopped status=running
-/spring-registration -> restart=unless-stopped status=running
+HTTP/1.1 200
 ```
 
-`unless-stopped` is important because the containers should automatically start after a server reboot.
+The registration page:
 
----
-
-# Restart Containers
-
-Restart MySQL:
-
-```bash
-docker restart mysql
+```text
+http://localhost:8081/register
 ```
 
-Restart Spring:
+The data page:
 
-```bash
-docker restart spring-registration
-```
-
-Restart both:
-
-```bash
-docker restart mysql spring-registration
-```
-
-Check:
-
-```bash
-docker ps
+```text
+http://localhost:8081/fetch
 ```
 
 ---
 
-# Server Reboot Behavior
+# ☁️ Cloudflare Tunnel
 
-After reboot:
+The application is published through Cloudflare Tunnel.
 
-```bash
-docker ps
-```
-
-The following containers should automatically start:
-
-```text
-mysql
-spring-registration
-calci
-tailscale
-```
-
-The dependency chain is:
-
-```text
-MySQL
-  ↓
-Spring Registration
-```
-
-Therefore MySQL must be available for Spring to successfully initialize its datasource.
-
----
-
-# Cloudflare Tunnel
-
-The application is published through Cloudflare Tunnel without exposing port 8081 directly to the public Internet.
-
-### Public URL
-
-```text
-https://spring-registration.rohitnet.dpdns.org/
-```
-
-### Cloudflare Flow
+Architecture:
 
 ```text
 Internet
-    ↓
+   │
+   ▼
 Cloudflare
-    ↓
-Cloudflare Tunnel
-    ↓
-Ubuntu Server
-    ↓
+   │
+   ▼
+spring-registration.rohitnet.dpdns.org
+   │
+   ▼
+cloudflared
+   │
+   ▼
 localhost:8081
-    ↓
-spring-registration
+   │
+   ▼
+Spring Boot Container
 ```
 
-Cloudflare hostname:
+The public hostname is:
 
 ```text
 spring-registration.rohitnet.dpdns.org
 ```
 
-Cloudflare Tunnel forwards the hostname to:
-
-```text
-http://localhost:8081
-```
-
-The application itself does not need to know anything about Cloudflare.
+The Cloudflare tunnel forwards traffic to the local Spring application.
 
 ---
 
-# Production Flow
+# 🔐 Security
+
+## MySQL
+
+The Docker MySQL container is not directly exposed to the internet.
+
+The host mapping is:
 
 ```text
-User
- │
- ▼
-https://spring-registration.rohitnet.dpdns.org/
- │
- ▼
-Cloudflare
- │
- ▼
-Cloudflare Tunnel
- │
- ▼
-Ubuntu Server
- │
- ▼
-localhost:8081
- │
- ▼
-Spring Boot Container
- │
- ▼
-MySQL Container
+3307 → 3306
+```
+
+and is intended for local GUI/CLI access.
+
+The Spring container accesses MySQL internally through:
+
+```text
+mysql:3306
+```
+
+## Database Password
+
+Do not commit database passwords into:
+
+* Git
+* `application.properties`
+* Dockerfiles
+* README files
+* public repositories
+
+Use environment variables or secrets.
+
+## Application Passwords
+
+The current demonstration application stores registration passwords directly in the database.
+
+For production applications, passwords should be securely hashed, for example using BCrypt, rather than storing plaintext passwords.
+
+---
+
+# 🔄 Restart and Reboot Behavior
+
+Both application and database containers use:
+
+```text
+--restart unless-stopped
+```
+
+Therefore, after a server reboot, Docker can automatically start:
+
+```text
+mysql
+spring-registration
+```
+
+The MySQL database remains persistent because it uses:
+
+```text
+mysql-data
 ```
 
 ---
 
-# Why MySQL Is Not Public
+# 🧪 Useful Docker Commands
 
-Do **not** expose:
+### List containers
 
-```text
-3306
+```bash
+docker ps
 ```
-
-to the Internet.
-
-The correct architecture is:
-
-```text
-Internet
-   ↓
-Cloudflare
-   ↓
-Spring :8081
-   ↓
-MySQL :3306
-```
-
-not:
-
-```text
-Internet
-   ↓
-MySQL :3306
-```
-
-MySQL remains inside the Docker network.
-
----
-
-# Useful Docker Commands
 
 ### List all containers
 
 ```bash
 docker ps -a
-```
-
-### Running containers
-
-```bash
-docker ps
 ```
 
 ### View Spring logs
@@ -713,49 +679,49 @@ docker ps
 docker logs spring-registration
 ```
 
-### View MySQL logs
-
-```bash
-docker logs mysql
-```
-
 ### Follow Spring logs
 
 ```bash
 docker logs -f spring-registration
 ```
 
-### Restart Spring
+### View MySQL logs
 
 ```bash
-docker restart spring-registration
+docker logs mysql
 ```
 
-### Restart MySQL
+### Inspect Spring environment
 
 ```bash
-docker restart mysql
+docker exec spring-registration env | grep '^DB_'
 ```
 
-### Inspect Spring
+### Enter MySQL container
 
 ```bash
-docker inspect spring-registration
+docker exec -it mysql mysql -uroot -p
 ```
 
-### Inspect MySQL
+### Check Docker networks
 
 ```bash
-docker inspect mysql
+docker network ls
 ```
 
-### Check network
+### Inspect application network
 
 ```bash
 docker network inspect spring-net
 ```
 
-### Check volume
+### List volumes
+
+```bash
+docker volume ls
+```
+
+### Inspect MySQL volume
 
 ```bash
 docker volume inspect mysql-data
@@ -763,370 +729,231 @@ docker volume inspect mysql-data
 
 ---
 
-# Troubleshooting
+# 🛠️ Troubleshooting
 
-## Spring Container Keeps Restarting
+## Spring container is stopped
 
 Check:
 
 ```bash
-docker logs --tail 100 spring-registration
+docker ps -a
 ```
 
-If the logs show:
+Then:
 
-```text
-Failed to configure a DataSource
+```bash
+docker logs spring-registration
 ```
 
-check the database environment variables:
+Start it:
+
+```bash
+docker start spring-registration
+```
+
+---
+
+## MySQL container is stopped
+
+Check:
+
+```bash
+docker ps -a
+```
+
+Then:
+
+```bash
+docker logs mysql
+```
+
+Start it:
+
+```bash
+docker start mysql
+```
+
+---
+
+## Spring cannot connect to MySQL
+
+Check both containers:
+
+```bash
+docker ps
+```
+
+Check the Spring environment:
 
 ```bash
 docker exec spring-registration env | grep '^DB_'
 ```
 
-Check MySQL:
+It should contain:
 
-```bash
-docker ps
+```text
+DB_URL=jdbc:mysql://mysql:3306/rohit
 ```
 
-MySQL must be running.
-
----
-
-## Spring Cannot Connect to MySQL
-
-Check that both containers are on the same network:
+Check the Docker network:
 
 ```bash
 docker network inspect spring-net
 ```
 
-Both should appear:
+Both containers should be connected to:
 
 ```text
-mysql
-spring-registration
-```
-
-Check the JDBC URL:
-
-```text
-jdbc:mysql://mysql:3306/rohit
-```
-
-Do not use:
-
-```text
-jdbc:mysql://localhost:3306/rohit
-```
-
-inside the Spring container.
-
----
-
-## Cloudflare Returns 502
-
-First test the application locally:
-
-```bash
-curl -I http://localhost:8081/register
-```
-
-If this fails:
-
-```text
-Cloudflare is not the problem.
-```
-
-Check:
-
-```bash
-docker ps
-docker logs spring-registration
-```
-
-If local access works but Cloudflare returns 502, check the Cloudflare Tunnel configuration.
-
-The origin should point to:
-
-```text
-http://localhost:8081
-```
-
----
-
-## MySQL Is Stopped After Reboot
-
-Check:
-
-```bash
-docker inspect -f '{{.HostConfig.RestartPolicy.Name}}' mysql
-```
-
-It should return:
-
-```text
-unless-stopped
-```
-
-If not:
-
-```bash
-docker update --restart unless-stopped mysql
-```
-
----
-
-## Spring Is Stopped After Reboot
-
-Check:
-
-```bash
-docker inspect -f '{{.HostConfig.RestartPolicy.Name}}' spring-registration
-```
-
-Fix:
-
-```bash
-docker update --restart unless-stopped spring-registration
-```
-
----
-
-# Current Container Architecture
-
-```text
-┌──────────────────────────────────────────────────┐
-│                 Ubuntu Server                    │
-│                                                  │
-│  ┌────────────────────────────────────────────┐  │
-│  │              Docker                       │  │
-│  │                                            │  │
-│  │  ┌──────────────────┐                     │  │
-│  │  │    spring-net    │                     │  │
-│  │  │                  │                     │  │
-│  │  │ ┌──────────────┐ │   ┌──────────────┐ │  │
-│  │  │ │    Spring    │ │   │    MySQL     │ │  │
-│  │  │ │ registration │◄├───►│    :3306     │ │  │
-│  │  │ │    :8081     │ │   └──────┬───────┘ │  │
-│  │  │ └───────┬──────┘ │          │         │  │
-│  │  └──────────┼────────┘          │         │  │
-│  │             │                   │         │  │
-│  └─────────────┼───────────────────┼─────────┘  │
-│                │                   │            │
-│          Host :8081          mysql-data         │
-│                                                  │
-│                │                                 │
-│         cloudflared                              │
-└────────────────┼─────────────────────────────────┘
-                 │
-                 ▼
-            Cloudflare
-                 │
-                 ▼
-     spring-registration.rohitnet.dpdns.org
-```
-
----
-
-# Deployment Summary
-
-The application is deployed using the following components:
-
-```text
-Spring Boot
-    ↓
-WAR
-    ↓
-Docker Image
-    ↓
-Spring Container
-    ↓
-Docker Network
-    ↓
-MySQL Container
-    ↓
-Docker Volume
-```
-
-Public access:
-
-```text
-Internet
-    ↓
-Cloudflare Tunnel
-    ↓
-Spring Container
-```
-
-Database access:
-
-```text
-Spring Container
-    ↓
 spring-net
-    ↓
-MySQL Container
-    ↓
-mysql-data
 ```
 
 ---
 
-# Important Security Notes
+## `registration` table is missing
 
-Never commit passwords to Git.
+Check the Docker MySQL instance:
 
-Use:
+```bash
+docker exec mysql mysql -uroot -p'YOUR_MYSQL_PASSWORD' rohit \
+-e "SHOW TABLES;"
+```
+
+Do not confuse this with:
+
+```bash
+sudo mysql -u root -p
+```
+
+The latter connects to the separate host MySQL 8.0 installation.
+
+---
+
+# 🧠 Important Port Difference
 
 ```text
-YOUR_MYSQL_PASSWORD
+                 HOST MACHINE
+                     │
+       ┌─────────────┴─────────────┐
+       │                           │
+       ▼                           ▼
+Host MySQL 8.0               Docker MySQL 9.7
+localhost:3306               localhost:3307
+       │                           │
+       ▼                           ▼
+customers                    registration
+employees                    registration_seq
+orders
 ```
 
-in documentation instead of the real password.
-
-MySQL should remain private and should not be published with:
-
-```bash
--p 3306:3306
-```
-
-Only the application HTTP port needs to be reachable by the reverse proxy/tunnel.
-
----
-
-# Quick Deployment
-
-For a fresh deployment:
-
-```bash
-docker network create spring-net
-docker volume create mysql-data
-```
-
-Start MySQL:
-
-```bash
-docker run -d \
-  --name mysql \
-  --restart unless-stopped \
-  --network spring-net \
-  -e MYSQL_ROOT_PASSWORD='YOUR_MYSQL_PASSWORD' \
-  -e MYSQL_DATABASE=rohit \
-  -v mysql-data:/var/lib/mysql \
-  mysql:9.7
-```
-
-Build application:
-
-```bash
-docker build -t spring-registration:1.0 .
-```
-
-Start application:
-
-```bash
-docker run -d \
-  --name spring-registration \
-  --restart unless-stopped \
-  --network spring-net \
-  -p 8081:8081 \
-  -e DB_URL="jdbc:mysql://mysql:3306/rohit" \
-  -e DB_USERNAME="root" \
-  -e DB_PASSWORD='YOUR_MYSQL_PASSWORD' \
-  spring-registration:1.0
-```
-
-Verify:
-
-```bash
-docker ps
-```
-
-Test:
-
-```bash
-curl -I http://localhost:8081/register
-```
-
-Then verify the public application:
+Inside Docker:
 
 ```text
-https://spring-registration.rohitnet.dpdns.org/
+Spring Container
+      │
+      ▼
+mysql:3306
+      │
+      ▼
+Docker MySQL 9.7
+```
+
+Therefore:
+
+```text
+Spring → mysql:3306
+DBeaver → localhost:3307
+CLI → localhost:3307
 ```
 
 ---
 
-# Final Architecture
+# 📋 Deployment Summary
+
+| Component           | Configuration                          |
+| ------------------- | -------------------------------------- |
+| OS                  | Ubuntu Server 24.04.x                  |
+| Java                | 17                                     |
+| Spring Boot         | 4.1.1                                  |
+| Application         | Spring MVC + JSP                       |
+| Application Port    | 8081                                   |
+| Docker Network      | spring-net                             |
+| MySQL Image         | mysql:9.7                              |
+| MySQL Internal Port | 3306                                   |
+| MySQL Host Port     | 3307                                   |
+| Database            | rohit                                  |
+| MySQL Volume        | mysql-data                             |
+| Spring Container    | spring-registration                    |
+| MySQL Container     | mysql                                  |
+| Restart Policy      | unless-stopped                         |
+| Public Access       | Cloudflare Tunnel                      |
+| Public Hostname     | spring-registration.rohitnet.dpdns.org |
+
+---
+
+# 🏁 Final Architecture
 
 ```text
                          PUBLIC INTERNET
-                               │
-                               ▼
-                     ┌───────────────────┐
-                     │    Cloudflare     │
-                     │      Tunnel       │
-                     └─────────┬─────────┘
-                               │
-                               ▼
-            https://spring-registration.
-                 rohitnet.dpdns.org/
-                               │
-                               ▼
-                     ┌───────────────────┐
-                     │ Ubuntu Server     │
-                     │                   │
-                     │ localhost:8081   │
-                     └─────────┬─────────┘
-                               │
-                               ▼
-                    ┌─────────────────────┐
-                    │ spring-registration │
-                    │    Spring Boot      │
-                    │      Tomcat         │
-                    └──────────┬──────────┘
-                               │
+                                │
+                                ▼
+                         ┌─────────────┐
+                         │ Cloudflare  │
+                         └──────┬──────┘
+                                │
+                                ▼
+             spring-registration.rohitnet.dpdns.org
+                                │
+                                ▼
+                         cloudflared
+                                │
+                                ▼
+                       localhost:8081
+                                │
+                                ▼
+                 ┌─────────────────────────┐
+                 │ spring-registration     │
+                 │ Spring Boot             │
+                 │ Java 17                 │
+                 │ Port 8081               │
+                 └───────────┬─────────────┘
+                             │
                          spring-net
-                               │
-                               ▼
-                    ┌─────────────────────┐
-                    │        MySQL        │
-                    │       :3306         │
-                    └──────────┬──────────┘
-                               │
-                               ▼
-                    ┌─────────────────────┐
-                    │    mysql-data       │
-                    │   Docker Volume     │
-                    └─────────────────────┘
+                             │
+                             ▼
+                 ┌─────────────────────────┐
+                 │ mysql                   │
+                 │ MySQL 9.7               │
+                 │ Container Port 3306     │
+                 │ Host Port 3307          │
+                 └───────────┬─────────────┘
+                             │
+                             ▼
+                       mysql-data
+                             │
+                             ▼
+                           rohit
+                             │
+                  ┌──────────┴──────────┐
+                  │                     │
+          registration          registration_seq
 ```
 
----
+## Current Status
 
-## Live Deployment
+The application is successfully:
 
-The application is currently deployed and publicly accessible through:
+* ✅ Built with Maven
+* ✅ Packaged as a WAR
+* ✅ Containerized with Docker
+* ✅ Running on port `8081`
+* ✅ Connected to Docker MySQL 9.7
+* ✅ Using database `rohit`
+* ✅ Persisting data in `mysql-data`
+* ✅ Connected through Docker network `spring-net`
+* ✅ Configured with automatic container restart
+* ✅ Accessible through Cloudflare Tunnel
+* ✅ Accessible publicly through the live domain
+* ✅ Accessible from DBeaver/CLI through `localhost:3307`
+* ✅ Confirmed to contain the `registration` table
+* ✅ Confirmed to contain 2 registration records
 
-**https://spring-registration.rohitnet.dpdns.org/**
-
-The production stack consists of:
-
-```text
-Cloudflare Tunnel
-        ↓
-Ubuntu Server
-        ↓
-Docker
-        ↓
-Spring Boot + Tomcat
-        ↓
-Docker Network: spring-net
-        ↓
-MySQL 9.7
-        ↓
-Docker Volume: mysql-data
-```
-
-The Spring application runs on port `8081`, while MySQL remains private on port `3306` inside the Docker network.
