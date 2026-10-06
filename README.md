@@ -4,6 +4,19 @@ A containerized Spring Boot MVC registration application using JSP, Spring Data 
 
 ---
 
+## 🌐 Live Application
+
+**Live URL:** [spring-registration.rohitnet.dpdns.org](https://spring-registration.rohitnet.dpdns.org/?utm_source=chatgpt.com)
+
+### Application Pages
+
+* **Registration:** [Register Page](https://spring-registration.rohitnet.dpdns.org/register?utm_source=chatgpt.com)
+* **Fetch Data:** [Fetch Data](https://spring-registration.rohitnet.dpdns.org/fetch?utm_source=chatgpt.com)
+
+The application is publicly accessible through Cloudflare Tunnel.
+
+---
+
 ## Architecture
 
 ```text
@@ -14,6 +27,10 @@ A containerized Spring Boot MVC registration application using JSP, Spring Data 
                     │    Cloudflare   │
                     │      Tunnel     │
                     └────────┬────────┘
+                             │
+                             ▼
+                    spring-registration
+                    .rohitnet.dpdns.org
                              │
                              ▼
                     localhost:8081
@@ -71,6 +88,7 @@ The application provides:
 * JSP-based views
 * Exception handling
 * Spring Data JPA repository integration
+* Public HTTPS access through Cloudflare Tunnel
 
 ### Application URLs
 
@@ -155,7 +173,7 @@ spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
 ```
 
-### Environment variables
+### Environment Variables
 
 The application receives database configuration through environment variables:
 
@@ -350,7 +368,7 @@ ENTRYPOINT ["java", "-jar", "app.war"]
 
 The Dockerfile uses a multi-stage build.
 
-### Build stage
+### Build Stage
 
 ```text
 maven:3.9-eclipse-temurin-17
@@ -358,7 +376,7 @@ maven:3.9-eclipse-temurin-17
 
 compiles the application and creates the WAR.
 
-### Runtime stage
+### Runtime Stage
 
 ```text
 eclipse-temurin:17-jre
@@ -572,9 +590,15 @@ Therefore MySQL must be available for Spring to successfully initialize its data
 
 # Cloudflare Tunnel
 
-The application can be published through Cloudflare Tunnel without exposing port 8081 directly to the Internet.
+The application is published through Cloudflare Tunnel without exposing port 8081 directly to the public Internet.
 
-Architecture:
+### Public URL
+
+```text
+https://spring-registration.rohitnet.dpdns.org/
+```
+
+### Cloudflare Flow
 
 ```text
 Internet
@@ -596,13 +620,42 @@ Cloudflare hostname:
 spring-registration.rohitnet.dpdns.org
 ```
 
-Cloudflare Tunnel service should forward the hostname to:
+Cloudflare Tunnel forwards the hostname to:
 
 ```text
 http://localhost:8081
 ```
 
 The application itself does not need to know anything about Cloudflare.
+
+---
+
+# Production Flow
+
+```text
+User
+ │
+ ▼
+https://spring-registration.rohitnet.dpdns.org/
+ │
+ ▼
+Cloudflare
+ │
+ ▼
+Cloudflare Tunnel
+ │
+ ▼
+Ubuntu Server
+ │
+ ▼
+localhost:8081
+ │
+ ▼
+Spring Boot Container
+ │
+ ▼
+MySQL Container
+```
 
 ---
 
@@ -712,7 +765,7 @@ docker volume inspect mysql-data
 
 # Troubleshooting
 
-## Spring container keeps restarting
+## Spring Container Keeps Restarting
 
 Check:
 
@@ -742,7 +795,7 @@ MySQL must be running.
 
 ---
 
-## Spring cannot connect to MySQL
+## Spring Cannot Connect to MySQL
 
 Check that both containers are on the same network:
 
@@ -773,7 +826,7 @@ inside the Spring container.
 
 ---
 
-## Cloudflare returns 502
+## Cloudflare Returns 502
 
 First test the application locally:
 
@@ -804,7 +857,7 @@ http://localhost:8081
 
 ---
 
-## MySQL is stopped after reboot
+## MySQL Is Stopped After Reboot
 
 Check:
 
@@ -826,7 +879,7 @@ docker update --restart unless-stopped mysql
 
 ---
 
-## Spring is stopped after reboot
+## Spring Is Stopped After Reboot
 
 Check:
 
@@ -852,7 +905,7 @@ docker update --restart unless-stopped spring-registration
 │  │              Docker                       │  │
 │  │                                            │  │
 │  │  ┌──────────────────┐                     │  │
-│  │  │ spring-net       │                     │  │
+│  │  │    spring-net    │                     │  │
 │  │  │                  │                     │  │
 │  │  │ ┌──────────────┐ │   ┌──────────────┐ │  │
 │  │  │ │    Spring    │ │   │    MySQL     │ │  │
@@ -998,6 +1051,12 @@ Test:
 curl -I http://localhost:8081/register
 ```
 
+Then verify the public application:
+
+```text
+https://spring-registration.rohitnet.dpdns.org/
+```
+
 ---
 
 # Final Architecture
@@ -1010,6 +1069,10 @@ curl -I http://localhost:8081/register
                      │    Cloudflare     │
                      │      Tunnel       │
                      └─────────┬─────────┘
+                               │
+                               ▼
+            https://spring-registration.
+                 rohitnet.dpdns.org/
                                │
                                ▼
                      ┌───────────────────┐
@@ -1040,4 +1103,30 @@ curl -I http://localhost:8081/register
                     └─────────────────────┘
 ```
 
-This provides a simple containerized Spring MVC application with a private MySQL database, persistent database storage, automatic container restart, and public HTTPS access through Cloudflare Tunnel.
+---
+
+## Live Deployment
+
+The application is currently deployed and publicly accessible through:
+
+**https://spring-registration.rohitnet.dpdns.org/**
+
+The production stack consists of:
+
+```text
+Cloudflare Tunnel
+        ↓
+Ubuntu Server
+        ↓
+Docker
+        ↓
+Spring Boot + Tomcat
+        ↓
+Docker Network: spring-net
+        ↓
+MySQL 9.7
+        ↓
+Docker Volume: mysql-data
+```
+
+The Spring application runs on port `8081`, while MySQL remains private on port `3306` inside the Docker network.
